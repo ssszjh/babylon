@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>点光源</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <!-- 点光源从一个点，向所有方向发出光线。它的光线强度会随着距离的增加而衰减。一个非常有代表性的使用场景就是模拟灯泡、火把 -->
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        // 灯光
+        var light = new BABYLON.PointLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        light.diffuse = new BABYLON.Color3(1, 0, 0) // 设置漫反射为红色
+        light.specular = new BABYLON.Color3(0, 1, 0) // 设置高光为绿色
+
+        var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', {}, scene)
+        sphere.position.y = 2
+
+        var sphere2 = BABYLON.MeshBuilder.CreateSphere('sphere2', {}, scene)
+        sphere2.position.y = -2
+
+        var sphere3 = BABYLON.MeshBuilder.CreateSphere('sphere3', {}, scene)
+        sphere3.position.x = 2
+
+        var sphere4 = BABYLON.MeshBuilder.CreateSphere('sphere4', {}, scene)
+        sphere4.position.x = -2
+
+        var sphere5 = BABYLON.MeshBuilder.CreateSphere('sphere5', {}, scene)
+        var ground = BABYLON.MeshBuilder.CreateGround(
+          'ground',
+          { width: 4, height: 6 },
+          scene
+        )
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

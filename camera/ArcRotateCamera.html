@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>弧形旋转相机</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+        // 适用于需要围绕目标对象进行旋转、缩放和平移的场景。同时也提供了直观的控制方式，用户可以通过鼠标或触摸手势轻松操作相机视角。
+        /**
+         * @param name定义摄像机的名称
+         * @param alpha定义相机沿纵轴旋转
+         * @param beta定义相机沿纬度轴旋转
+         * @param radius定义相机到目标的距离
+         * @param target定义相机目标
+         * @param scene定义相机所属的场景
+         * @param setActiveOnSceneIfNoneActive定义摄像机是否应该被标记为活动，如果没有其他活动摄像机已被定义
+         */
+        // constructor(
+        //   name: string,
+        //   alpha: number,
+        //   beta: number,
+        //   radius: number,
+        //   target: Vector3,
+        //   scene?: Scene,
+        //   setActiveOnSceneIfNoneActive = true
+        // ) {}
+        // 创建弧度旋转相机
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          0,
+          0,
+          10,
+          new BABYLON.Vector3(0, 0, 0),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        // 创建灯光、球、地板
+        var light = new BABYLON.HemisphericLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        var sphere = BABYLON.MeshBuilder.CreateSphere(
+          'sphere',
+          { diameter: 2, segments: 32 },
+          scene
+        )
+        sphere.position.y = 1
+        var ground = BABYLON.MeshBuilder.CreateGround(
+          'ground',
+          { width: 6, height: 6 },
+          scene
+        )
+
+        // alpha 控制左右旋转
+        // 0：正对 X+ 轴
+        // Math.PI / 2：正对 Z- 轴（默认）
+        // Math.PI：正对 X- 轴
+        // 3 * Math.PI / 2：正对 Z+ 轴
+        // 2 * Math.PI：回到 X+ 方向
+
+        // beta 控制上下旋转
+        // 0：相机在水平线上（看不到物体上表面）
+        // Math.PI / 2（90°）：从正上方往下看
+        // Math.PI（180°）：从正下方往上看
+
+        // alpha	左右旋转角度（0~2π）	Math.PI / 2（默认朝 Z- 方向）
+        // beta	    上下旋转角度（0~π）	    Math.PI / 4（默认斜角向下）
+        // radius	相机到目标的距离	    10（默认 10 个单位远）
+
+        setTimeout(() => {
+          console.log('1111')
+          //   camera.alpha = Math.PI / 2
+            camera.beta = Math.PI / 4
+            camera.radius = 20
+        }, 5000)
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

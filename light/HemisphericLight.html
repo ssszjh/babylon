@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>半球光</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        // 灯光
+        // 模拟从天空和地面反射的环境光。它从一个方向发出光线，并且有一个对立方向的环境光，适用于模拟自然光照效果。
+        /**
+         * 根据传入的方向（Vector3）在场景中创建一个HemisphericLight对象。
+         * 该对象模拟环境光，因此传入的方向是光的反射方向，而不是入射方向。
+         * HemisphericLight不能投射阴影。
+         * 文档：https://doc.babylonjs.com/features/featuresDeepDive/lights/lights_introduction
+         * @param name 灯光的名称
+         * @param direction 灯光反射的方向
+         * @param scene 灯光所属的场景
+         */
+        // constructor(
+        //   name: string,
+        //   direction: Vector3,
+        //   scene?: Scene
+        // ) {}
+
+        var light = new BABYLON.HemisphericLight(
+          'hemiLight',
+          new BABYLON.Vector3(-1, 1, 0),
+          scene
+        )
+        // 漫反射
+        light.diffuse = new BABYLON.Color3(1, 0, 0)
+        // 高光
+        light.specular = new BABYLON.Color3(0, 1, 0)
+        // 地面反射光颜色
+        light.groundColor = new BABYLON.Color3(0, 1, 0)
+
+        var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', {}, scene)
+
+        setTimeout(() => {
+          // 开光灯 setEnabled()
+          // light.setEnabled(true) // 开灯
+          //   light.setEnabled(false) // 关灯
+          //   强度 intensity
+          light.intensity = 0.5 // 调暗
+          // light.intensity = 2.4; // 调亮
+        }, 5000)
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

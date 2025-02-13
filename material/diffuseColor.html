@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>漫反射</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        var light = new BABYLON.HemisphericLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        // 红光
+        // light.diffuse = new BABYLON.Color3(1, 0, 0)
+        // 白光
+        light.diffuse = new BABYLON.Color3(1, 1, 1)
+
+        // 材质
+        const material = new BABYLON.StandardMaterial('material', scene)
+        // 使用三个浮点数参数来表示颜色的红色、绿色和蓝色分量。每个参数的范围是从 0 到 1。
+
+        // 漫反射 光线在物体表面均匀散射的效果，决定了物体在光照下的主要颜色和外观。
+        // 灯光设置漫反射属性(light.diffuse)，给材质设置漫反射颜色属性(material.diffuseColor)，两者相遇时，产生漫反射，显示最终看到的效果。
+        // 漫反射计算颜色:
+        // 当光源的颜色和材质的颜色进行乘法运算时，实际上是在计算每个颜色通道（红、绿、蓝）上的光能量和反射能力的乘积
+        // 例如：光源颜色为蓝色 (0, 0, 1)，材质颜色为黄色 (1, 1, 0)。
+        // 计算每个通道的乘积：
+        // 红色通道：0 * 1 = 0
+        // 绿色通道：0 * 1 = 0
+        // 蓝色通道：1 * 0 = 0
+        // 最终的结果是 (0, 0, 0)，即黑色。
+        // 若无材质颜色,则为灯源颜色;若无光源,则未黑色(看不到无光)
+        // 优点：
+        // 易于使用: 设置颜色和纹理非常简单，适合快速原型设计。
+        // 高效渲染: 漫反射计算相对简单，对性能影响较小。
+        // 广泛应用: 适用于大多数常见的材质效果，如木材、金属、布料等。
+        // 缺点：
+        // 缺乏细节: 仅使用漫反射可能无法表现出复杂的光照效果，如高光、反射等。
+        // 依赖光源: 漫反射效果依赖于场景中的光源设置，光源不足时效果不明显。
+        material.diffuseColor = new BABYLON.Color3(1, 1, 0)
+
+        // 材质禁止光照
+        // material.disableLighting = true
+        // 透明度
+        // material.alpha = 0.5;
+        // 设置同时影响的光源数量为 3(默认值是4)
+        // material.maxSimultaneousLights = 3;
+
+        const sphere1 = BABYLON.MeshBuilder.CreateSphere('sphere1', {})
+        sphere1.position.x = -1.5
+
+        const sphere2 = BABYLON.MeshBuilder.CreateSphere('sphere2', {})
+        sphere2.material = material
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

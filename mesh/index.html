@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>网格</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        // 创建平行光，且光线方向垂直朝下
+        var light = new BABYLON.DirectionalLight(
+          'DirectionalLight',
+          new BABYLON.Vector3(0, -1, 0),
+          scene
+        )
+
+        // 创建盒子
+        const sphere = BABYLON.MeshBuilder.CreateSphere(
+          'sphere',
+          { segments: 8, diameter: 1 },
+          scene
+        )
+        sphere.position.x = 1
+
+        const sphere2 = BABYLON.MeshBuilder.CreateSphere(
+          'sphere',
+          { segments: 32, diameter: 1 },
+          scene
+        )
+        sphere2.position.x = -1
+
+        const sphere3 = BABYLON.MeshBuilder.CreateSphere(
+          'sphere3',
+          { segments: 32, diameterX: 2 },
+          scene
+        )
+        sphere3.position.x = 3
+
+        const sphere4 = BABYLON.MeshBuilder.CreateSphere(
+          'sphere4',
+          { segments: 32, diameterY: 2 },
+          scene
+        )
+        sphere4.position.x = 5
+
+        const sphere5 = BABYLON.MeshBuilder.CreateSphere(
+          'sphere5',
+          { segments: 32, diameter: 2 },
+          scene
+        )
+        sphere5.position.x = 7
+
+        const sphere6 = BABYLON.MeshBuilder.CreateSphere('sphere6', {
+          arc: 0.25,
+          sideOrientation: BABYLON.Mesh.DOUBLESIDE
+        })
+        sphere6.position.x = -3
+
+        const sphere7 = BABYLON.MeshBuilder.CreateSphere('sphere7', {
+          arc: 0.25
+        })
+        sphere7.position.x = -5
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

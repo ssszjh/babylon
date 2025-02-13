@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Babylon.js Example 02</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        // 创建一个场景
+        const scene = new BABYLON.Scene(engine)
+        // 创建一个摄像机，并将其放置在场景中
+        const camera = new BABYLON.FreeCamera(
+          'camera1',
+          new BABYLON.Vector3(0, 5, -10),
+          scene
+        )
+        // 摄像机指向场景的原点
+        camera.setTarget(BABYLON.Vector3.Zero())
+        // 使摄像机响应鼠标和键盘事件
+        camera.attachControl(canvas, true)
+        // 创建一个简单的环境光源
+        const light = new BABYLON.HemisphericLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        // 设置光源的强度
+        light.intensity = 0.7
+        // 创建盒子
+        createBox(scene)
+
+        return scene
+      }
+
+      const createBox = function (scene) {
+        // 正方形 球形 圆柱 胶囊 面板 圆环
+        const box = [
+          'CreateBox',
+          'CreateSphere',
+          'CreateCylinder',
+          'CreateCapsule',
+          'CreatePlane',
+          'CreateTorus'
+        ]
+        const material = new BABYLON.StandardMaterial('material', scene)
+        material.diffuseColor = new BABYLON.Color3(0, 1, 0)
+        const len = (box.length / 2).toFixed()
+
+        box.forEach((item, index) => {
+          const mesh = BABYLON.MeshBuilder[item](item, { size: 1 }, scene)
+          mesh.position.x = len * -2 + index * 2
+          mesh.material = material
+        })
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

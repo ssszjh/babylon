@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>不透明贴图</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        // 随便创建一个灯光，并设置漫反射颜色为白色
+        var light = new BABYLON.HemisphericLight(
+          'hemiLight',
+          new BABYLON.Vector3(-1, 1, 0),
+          scene
+        )
+        light.diffuse = new BABYLON.Color3(1, 1, 1)
+
+        var mat0 = new BABYLON.StandardMaterial('mat0', scene)
+        // 设置材质的漫反射颜色为红色
+        mat0.diffuseColor = new BABYLON.Color3(1, 0, 0)
+        // 设置材质的透明度贴图
+        // mat0.opacityTexture = new BABYLON.Texture('./2.png', scene)
+        // // 设置漫反射贴图
+        // mat0.diffuseTexture = new BABYLON.Texture(
+        //   'https://doc.babylonjs.com/img/how_to/Materials/dog.png',
+        //   scene
+        // )
+        // mat0.diffuseTexture.hasAlpha = true
+        mat0.opacityTexture = new BABYLON.Texture("https://doc.babylonjs.com/img/how_to/Materials/dog.png", scene);
+
+        // 将材质设置给一个面片
+        var plane = BABYLON.MeshBuilder.CreatePlane('plane', {}, scene)
+        plane.material = mat0
+
+        var mat1 = new BABYLON.StandardMaterial('mat1', scene)
+        mat1.diffuseColor = new BABYLON.Color3(1, 0, 1)
+
+        // 为了更好的看到效果，我们在面片后面再创建一个球
+        var sphere1 = BABYLON.MeshBuilder.CreateSphere('sphere1', {}, scene)
+        sphere1.material = mat1
+        sphere1.position.z = 1.5
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

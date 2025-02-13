@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>环境光</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+        // 环境光 默认值为黑色
+        scene.ambientColor = new BABYLON.Color3(0, 1, 0)
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        var light = new BABYLON.HemisphericLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        // 红光
+        light.diffuse = new BABYLON.Color3(1, 0, 0)
+        // 白光
+        // light.diffuse = new BABYLON.Color3(0, 0, 0)
+
+        // 材质
+        const material = new BABYLON.StandardMaterial('material', scene)
+
+        // 环境光
+        // 环境光对应的是场景的 ambientColor属性，与材质的 ambientColor属性（或者 ambientTexture属性）相遇时产生的效果。
+        // 环境光计算颜色: 跟漫反射一样,只是光源换成了场景光
+        material.ambientColor = new BABYLON.Color3(0.23, 0.98, 0.53) // 环境光颜色
+
+        // 材质禁止光照
+        // material.disableLighting = true
+        // 透明度
+        // material.alpha = 0.5;
+        // 设置同时影响的光源数量为 3(默认值是4)
+        // material.maxSimultaneousLights = 3;
+
+        // 最终颜色 ≈ 环境光(scene.ambientColor) * 材质环境颜色(material.ambientColor) + 灯光扩散颜色(light.diffuse) * 材质扩散颜色(material.diffuseColor)
+
+        // sphere1没有材质， 材质环境颜色默认值为黑色(new BABYLON.Color3(0, 0, 0))  
+        // 所以没有环境光只计算了灯光扩散颜色(light.diffuse) * 材质扩散颜色(material.diffuseColor)
+        // 材质扩散颜色 (material.diffuseColor) 默认值为白色(new BABYLON.Color3(1, 1, 1))
+        const sphere1 = BABYLON.MeshBuilder.CreateSphere('sphere1', {})
+        sphere1.position.x = -1.5
+
+        const sphere2 = BABYLON.MeshBuilder.CreateSphere('sphere2', {})
+        sphere2.material = material
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

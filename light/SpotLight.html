@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>聚光灯</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 2,
+          5,
+          BABYLON.Vector3.Zero(),
+          scene
+        )
+        camera.attachControl(canvas, true)
+
+        // 灯光
+        // SpotLight是 Babylon.js 中的一种聚光灯光源，模拟现实世界中的聚光灯效果。
+        // 它从一个点发出光束，并在特定方向上逐渐扩散，形成一个锥形光束。SpotLight非常适合用于模拟舞台灯光、手电筒等场景。
+        // 光的方向是从一个位置直接向下一个单位向上，衰减缓慢
+        /**
+         * 在场景中创建一个 SpotLight 对象。聚光灯是一个简单的定向光锥。
+         * 它可以投射阴影。
+         * 文档: https://doc.babylonjs.com/features/featuresDeepDive/lights/lights_introduction
+         * @param name 光源的名称
+         * @param position 聚光灯在场景中的位置
+         * @param direction 光在场景中的方向
+         * @param angle 光锥的角度（以弧度表示）
+         * @param exponent 光从发射点开始的衰减速度
+         * @param scene 光源所属的场景
+         */
+        //   constructor(
+        //     name: string,
+        //     position: Vector3,
+        //     direction: Vector3,
+        //     angle: number,
+        //     exponent: number,
+        //     scene?: Scene
+        //   ) {}
+        var light = new BABYLON.SpotLight(
+          'spotLight',
+          new BABYLON.Vector3(-1, 1, -1),
+          new BABYLON.Vector3(0, -1, 0),
+          Math.PI / 2,
+          10,
+          scene
+        )
+        light.diffuse = new BABYLON.Color3(1, 0, 0)
+        light.specular = new BABYLON.Color3(0, 1, 0)
+
+        // 光的方向是从一个位置直接向下一个单位向上，衰减快
+        var light1 = new BABYLON.SpotLight(
+          'spotLight1',
+          new BABYLON.Vector3(1, 1, 1),
+          new BABYLON.Vector3(0, -1, 0),
+          Math.PI / 2,
+          50,
+          scene
+        )
+        light1.diffuse = new BABYLON.Color3(0, 1, 0)
+        light1.specular = new BABYLON.Color3(0, 1, 0)
+
+        var ground = BABYLON.MeshBuilder.CreateGround(
+          'ground',
+          { width: 4, height: 4 },
+          scene
+        )
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>

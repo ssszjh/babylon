@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>通用相机</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        //    CS，CF这种第一人称射击游戏，那么通用相机的视角就类似于那样。
+        //    它支持所有键盘、鼠标、触摸和游戏手柄操作，并且它作为第一人称射击游戏的首选相机，
+        //    已经被官方推荐取代了早期的 FreeCamera自由相机。
+        /**
+         * 通用相机
+         * @see https://doc.babylonjs.com/features/featuresDeepDive/cameras/camera_introduction#universal-camera
+         * @param name 定义相机在场景中的名称
+         * @param position 定义相机在场景中的起始位置
+         * @param scene 定义相机所属的场景
+         */
+        //  constructor
+        //   name: string,
+        //   position: Vector3,
+        //   scene?: Scene
+        // ) {}
+
+        // 创建相机
+        var camera = new BABYLON.UniversalCamera(
+          'camera1',
+          new BABYLON.Vector3(0, 5, -10),
+          scene
+        )
+        // 设置目标为原点
+        camera.setTarget(BABYLON.Vector3.Zero())
+        // 开启用户的输入控制
+        camera.attachControl(true)
+        // 启用鼠标滚轮
+        camera.inputs.addMouseWheel()
+
+        // 以下为创建场景中的其它物体，方便做对比
+        var light = new BABYLON.HemisphericLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        // 灯强度
+        light.intensity = 0.7
+
+        var sphere = BABYLON.MeshBuilder.CreateSphere(
+          'sphere',
+          { diameter: 2, segments: 32 },
+          scene
+        )
+        sphere.position.y = 1
+
+        var ground = BABYLON.MeshBuilder.CreateGround(
+          'ground',
+          { width: 6, height: 6 },
+          scene
+        )
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>
