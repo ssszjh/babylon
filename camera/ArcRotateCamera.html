@@ -62,6 +62,11 @@
         )
         camera.attachControl(canvas, true)
 
+        // 在屏幕上偏移目标位置
+        camera.targetScreenOffset = new BABYLON.Vector2(3, 0)
+        // 鼠标滚轮以当前鼠标位置（而不是固定的 camera.tareget 位置）为中心放大或缩小。
+        camera.zoomToMouseLocation = true
+
         // 创建灯光、球、地板
         var light = new BABYLON.HemisphericLight(
           'light',
@@ -79,6 +84,31 @@
           { width: 6, height: 6 },
           scene
         )
+
+        // 创建天空盒
+        const skybox = BABYLON.MeshBuilder.CreateBox(
+          'skyBox',
+          { size: 1000.0 },
+          scene
+        )
+        const skyboxMaterial = new BABYLON.StandardMaterial(
+          'skyBoxMaterial',
+          scene
+        )
+        skyboxMaterial.backFaceCulling = false
+
+        // 载入天空盒纹理
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+          './imgs/1',
+          scene
+        )
+        skyboxMaterial.reflectionTexture.coordinatesMode =
+          BABYLON.Texture.SKYBOX_MODE
+
+        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0)
+        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0)
+
+        skybox.material = skyboxMaterial
 
         // alpha 控制左右旋转
         // 0：正对 X+ 轴
@@ -99,9 +129,19 @@
         setTimeout(() => {
           console.log('1111')
           //   camera.alpha = Math.PI / 2
-            camera.beta = Math.PI / 4
-            camera.radius = 20
+          camera.beta = Math.PI / 4
+          camera.radius = 20
+          camera.lowerRadiusLimit = 10 // 最小半径
+          camera.upperRadiusLimit = 20 // 最大半径
         }, 5000)
+
+        // 设置相机限制
+        // camera.lowerAlphaLimit = 0; // 最小 alpha 角度
+        // camera.upperAlphaLimit = Math.PI; // 最大 alpha 角度
+        // camera.lowerBetaLimit = 0; // 最小 beta 角度
+        // camera.upperBetaLimit = Math.PI / 2; // 最大 beta 角度
+        // camera.lowerRadiusLimit = 10; // 最小半径
+        // camera.upperRadiusLimit = 20; // 最大半径
 
         return scene
       }

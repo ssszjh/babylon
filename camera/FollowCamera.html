@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>跟随相机</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      var createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        // 创建天空盒
+        var skybox = BABYLON.MeshBuilder.CreateBox(
+          'skyBox',
+          { size: 1000.0 },
+          scene
+        )
+        var skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene)
+        skyboxMaterial.backFaceCulling = false
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+          './imgs/1',
+          scene
+        )
+        skyboxMaterial.reflectionTexture.coordinatesMode =
+          BABYLON.Texture.SKYBOX_MODE
+        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0)
+        skyboxMaterial.specularColor = new BABYLON.Color3(0.11, 0.11, 0.11)
+        skybox.material = skyboxMaterial
+
+        /**
+         * @param name 定义摄像机的名称
+         * @param position 定义相机的位置
+         * @param scene 定义相机所属的场景
+         * @param lockedTarget 定义相机的目标
+         */
+        // constructor(
+        //   name: string,
+        //   position: Vector3,
+        //   scene?: Scene,
+        //   lockedTarget: Nullable<AbstractMesh> = null
+        // ) {}
+        // 创建 FollowCamera
+        var camera = new BABYLON.FollowCamera(
+          'FollowCam',
+          new BABYLON.Vector3(0, 10, -10),
+          scene
+        )
+        camera.attachControl()
+
+        // 相机距离目标的目标距离
+        camera.radius = 30
+
+        // 相机在目标局部原点（中心）上方的目标高度
+        camera.heightOffset = 10
+
+        // 相机绕目标局部原点（中心）在 xy 平面的目标旋转角度
+        camera.rotationOffset = 0
+
+        // 相机从当前位置移动到目标位置的加速度
+        camera.cameraAcceleration = 0.005
+
+        // 加速度停止时的速度
+        camera.maxCameraSpeed = 10
+
+        // 创建灯光、球、地板
+        var light = new BABYLON.HemisphericLight(
+          'light',
+          new BABYLON.Vector3(0, 1, 0),
+          scene
+        )
+        var sphere = BABYLON.MeshBuilder.CreateSphere(
+          'sphere',
+          { diameter: 2, segments: 32 },
+          scene
+        )
+        sphere.position.y = 1
+        var ground = BABYLON.MeshBuilder.CreateGround(
+          'ground',
+          { width: 6, height: 6 },
+          scene
+        )
+
+        // 设置相机的目标对象
+        camera.lockedTarget = sphere
+
+        // 创建动画
+        const frameRate = 10
+
+        const xSlide = new BABYLON.Animation(
+          'xSlide',
+          'position.x',
+          frameRate,
+          BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+          BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+        )
+
+        const keyFrames = []
+
+        keyFrames.push({
+          frame: 0,
+          value: 2
+        })
+
+        keyFrames.push({
+          frame: frameRate,
+          value: -2
+        })
+
+        keyFrames.push({
+          frame: 2 * frameRate,
+          value: 2
+        })
+
+        xSlide.setKeys(keyFrames)
+        sphere.animations.push(xSlide)
+        scene.beginAnimation(sphere, 0, 2 * frameRate, true)
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>
