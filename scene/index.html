@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>场景的生命周期钩子</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        /** 定义 Scene 类初始化参数的接口 */
+        // export interface SceneOptions {
+        //   /**
+        //    * 定义场景是否应保持几何体的映射以通过 uniqueId 快速查找
+        //    * 当几何体数量变得重要时，它将提高性能。
+        //    */
+        //   useGeometryUniqueIdsMap?: boolean;
+
+        //   /**
+        //    * 定义场景中的每个材质是否应保持引用网格的映射以快速处理
+        //    * 当网格数量变得重要时，它将提高性能，但可能会消耗更多内存。
+        //    */
+        //   useMaterialMeshMap?: boolean;
+
+        //   /**
+        //    * 定义场景中的每个网格是否应保持引用克隆网格的映射以快速处理
+        //    * 当网格数量变得重要时，它将提高性能，但可能会消耗更多内存。
+        //    */
+        //   useClonedMeshMap?: boolean;
+
+        //   /** 定义场景的创建是否应影响引擎（例如 UtilityLayer 的场景） */
+        //   virtual?: boolean;
+        // }
+        var scene = new BABYLON.Scene(engine, {
+          useGeometryUniqueIdsMap: true,
+          useMaterialMeshMap: true,
+          useClonedMeshMap: true,
+          virtual: false
+        })
+
+        scene.createDefaultCameraOrLight(true, true, true)
+        scene.createDefaultEnvironment()
+
+        // scene.isReady()方法用于查看 scene是否准备好。
+        console.log('scene is ready:', scene.isReady())
+
+        // 创建一个标准材质，并设置自发光贴图
+        const standardMat = new BABYLON.StandardMaterial('standardMat', scene)
+        standardMat.emissiveTexture = new BABYLON.Texture('./1', scene)
+
+        // 创建球，并将材质设置给它
+        const sphere0 = BABYLON.MeshBuilder.CreateSphere('sphere0', {}, scene)
+        sphere0.material = standardMat
+
+        // 在 ready 之后执行
+        // 通过 executeWhenReady() 方法注册一个回调函数，用于处理在 scene准备好后要做的事。
+        scene.executeWhenReady(() => {
+          console.log('scene is ready:', scene.isReady())
+          console.log('the material is ready:', standardMat.isReady())
+        }, true)
+
+        // scene.onReadyObservable.add注册多个回调函数
+        // 方式一：调用 add 进行监听
+        // const readyObserver1 = scene.onReadyObservable.add((scene) => {
+        // });
+        // // 返回的 readyObserver1 用于解绑
+        // scene.onReadyObservable.remove(readyObserver1);
+        // // or 调用自身的 remove 方法
+        // readyObserver1.remove();
+
+        // // 方式二：监听一次
+        // const readyObserver1 = scene.onReadyObservable.addOnce((scene) => {
+        // });
+        // 清空所有注册的函数 scene.onReadyObservable.clear()
+
+        // 场景的销毁，也有对应的 API：
+        // scene.dispose()
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+        // 它表示的就是渲染 scene 这个场景。
+        // 调用此方法，Babylon.js内部会做这么几件事：
+        // 1、更新动画和物理引擎
+        // 2、触发 onBeforeRenderObservable事件：在渲染之前通知所有观察者。（在下面会说）
+        // 3、渲染每个相机：对每个活动的相机进行渲染，并在渲染前后触发相应的事件。
+        // 4、触发 onAfterRenderObservable事件：在渲染之后通知所有观察者。
+        // 通过这些步骤，scene.render方法确保场景中的所有元素都被正确更新和渲染，并且在这个过程中也会有很多的钩子事件被抛出来，允许开发者在渲染过程的不同阶段插入自定义逻辑。
+        // 关于参数部分，它还有两个可选参数：
+        // updateCameras：指示摄像机是否必须根据输入进行更新（默认为true）
+        // ignoreAnimations：指示动画是否不应该执行（默认为 false）
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>
