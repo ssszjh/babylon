@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>天空盒</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        // 创建天空盒
+        var skybox = BABYLON.MeshBuilder.CreateBox(
+          'skyBox',
+          { size: 1000 },
+          scene
+        )
+
+        // 设置天空盒跟随相机
+        skybox.infiniteDistance = true
+
+        // 创建标准材质，名为 skyBox
+        var skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene)
+
+        /**
+           CubeTexture  创建一个立方体纹理，例如用于反射。它可以基于dds或六个图像，以及预过滤的数据。
+            @param rootUrl 定义纹理的url或六个图像的根名称
+            @param sceneOrEngine 定义纹理所附加的场景或引擎
+            @param extensionsOrOptions 定义在使用六个图像的情况下添加到图片名称的后缀，如_px.jpg，或创建立方体纹理的所有选项集
+            @param noMipmap 定义是否应创建mipmap
+            @param files 定义要按照以下顺序加载的六个文件的不同面：px, py, pz, nx, ny, nz
+            @param onLoad 定义在文件加载结束时如果没有错误发生触发的回调
+            @param onError 定义在加载过程中发生错误时触发的回调
+            @param format 定义一旦加载纹理后要使用的内部格式
+            @param prefiltered 定义纹理是否从预过滤的数据创建
+            @param forcedExtension 定义要使用的扩展名（强制加载特定类型的文件），以防它与文件名不同
+            @param createPolynomials 定义是否需要从纹理数据创建多项式谐波
+            @param lodScale 定义应用于环境纹理的比例。这管理了根据粗糙度用于IBL的LOD级别的范围
+            @param lodOffset 定义应用于环境纹理的偏移。这管理了根据粗糙度用于IBL的第一个LOD级别
+            @param loaderOptions 要传递给加载器的选项
+            @param useSRGBBuffer 定义纹理是否必须在sRGB GPU缓冲区中加载（如果GPU支持）（默认：false）
+            @returns 立方体纹理
+        */
+        // constructor(
+        //     rootUrl: string,
+        //     sceneOrEngine: Scene | AbstractEngine,
+        //     extensionsOrOptions: Nullable<string[] | ICubeTextureCreationOptions> = null,
+        //     noMipmap: boolean = false,
+        //     files: Nullable<string[]> = null,
+        //     onLoad: Nullable<() => void> = null,
+        //     onError: Nullable<(message?: string, exception?: any) => void> = null,
+        //     format: number = Constants.TEXTUREFORMAT_RGBA,
+        //     prefiltered = false,
+        //     forcedExtension: any = null,
+        //     createPolynomials: boolean = false,
+        //     lodScale: number = defaultLodScale,
+        //     lodOffset: number = 0,
+        //     loaderOptions?: any,
+        //     useSRGBBuffer?: boolean
+        // ) {}
+
+        // 创建一个 CubeTexture 并赋值给 skyBox 的 reflectionTexture 属性
+        // skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture(
+        //   './imgs/1',
+        //   scene
+        // )
+        const skyboxTexture = BABYLON.CubeTexture.CreateFromImages(
+          [
+            './skyBox/skyBox2/negx.jpg',
+            './skyBox/skyBox2/negy.jpg',
+            './skyBox/skyBox2/negz.jpg',
+            './skyBox/skyBox2/posx.jpg',
+            './skyBox/skyBox2/posy.jpg',
+            './skyBox/skyBox2/posz.jpg'
+          ],
+          scene
+        )
+
+        // ✅ 监听天空盒加载完成
+        skyboxTexture.onLoadObservable.add(() => {
+          console.log('🌟 天空盒纹理加载完成！')
+          // 可以在这里执行额外的逻辑，比如启动相机动画
+        })
+
+        // ✅ 监听加载错误
+        skyboxTexture.onError = (message, exception) => {
+          console.error('❌ 天空盒加载失败:', message, exception)
+        }
+
+        skyboxMaterial.reflectionTexture = skyboxTexture
+        // 别忘了把材质给到 skybox
+        skybox.material = skyboxMaterial
+
+        // 关闭背面剔除，让我们能看到立方体的内侧
+        skyboxMaterial.backFaceCulling = false
+        // 纹理以天空盒的方式进行渲染，它内部会去帮你把图与图之间的突兀给处理好：
+        skyboxMaterial.reflectionTexture.coordinatesMode =
+          BABYLON.Texture.SKYBOX_MODE
+        // 直接把所有光对天空盒材质的反射给禁用掉：
+        skyboxMaterial.disableLighting = true
+        // 或者使用另一种方式：因为 StandardMaterial的漫反射颜色 diffuseColor和高光颜色 specularColor都是白色，所以会显得很亮，
+        // 我们还可以直接把它们三个颜色通道都设置为0，让它不那么亮
+        // skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0)
+        // skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0)
+
+        var light = new BABYLON.HemisphericLight(
+          'default light',
+          BABYLON.Vector3.Up(),
+          scene
+        )
+
+        // 相机的 target 为 (550, 0, 0)
+        var camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          2.5,
+          1.5,
+          50,
+          new BABYLON.Vector3(0, 0, 0),
+          scene
+        )
+        camera.attachControl()
+        // camera.target = new BABYLON.Vector3(550, 0, 0)
+        camera.radius = 200
+
+        // // 球的半径为 50, 位置为 (550, 0, 0)
+        // var sphere1 = BABYLON.MeshBuilder.CreateSphere(
+        //   'sphere',
+        //   { segments: 30, diameter: 50 },
+        //   scene
+        // )
+        // sphere1.position = new BABYLON.Vector3(550, 0, 0)
+
+        var sphere = BABYLON.MeshBuilder.CreateSphere(
+          'sphere',
+          { segments: 30, diameter: 1 },
+          scene
+        )
+        sphere.position = new BABYLON.Vector3(0, 0, 0)
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>
