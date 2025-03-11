@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>动画</title>
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  </head>
+
+  <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+      // 获取 canvas 元素
+      const canvas = document.getElementById('renderCanvas')
+      // 初始化 Babylon.js 引擎
+      const engine = new BABYLON.Engine(canvas, true)
+
+      const createScene = function () {
+        var scene = new BABYLON.Scene(engine)
+
+        const camera = new BABYLON.ArcRotateCamera(
+          'Camera',
+          -Math.PI / 2,
+          Math.PI / 4,
+          10,
+          BABYLON.Vector3.Zero()
+        )
+        camera.attachControl(canvas, true)
+
+        const light1 = new BABYLON.DirectionalLight(
+          'DirectionalLight',
+          new BABYLON.Vector3(0, -1, 1)
+        )
+        const light2 = new BABYLON.HemisphericLight(
+          'HemiLight',
+          new BABYLON.Vector3(0, 1, 0)
+        )
+        light1.intensity = 0.75
+        light2.intensity = 0.5
+
+        const box = BABYLON.MeshBuilder.CreateBox('box', {})
+
+        const frameRate = 30
+
+        // 第二个入参与第四个入参是一致的
+        // 例如 targetProperty属性，它实际上就是定义了你的对象的哪个属性发生动画效果，同时这个属性是个什么类型的，也需要在第四个参数 dataType中告诉 Babylon.js。
+        // 就以平移为例，如果你只想要某个物体做 x方向的平移动画的话，
+        // 那么 targetProperty就定义 position.x，
+        // 同时 dataType定义 BABYLON.Animation.ANIMATIONTYPE_FLOAT，表明这个属性是一个浮点数。
+        // 而如果你是想要某个物体在各个方向上都发生平移动画，
+        // targetProperty就可以定义为 position，
+        // 然后dataType定义 BABYLON.Animation.ANIMATIONTYPE_VECTOR3，表明它是一个 Vector3类型的属性。
+        // 同时keyFrames的value也要改成 Vector3类型的值。
+        const animation = new BABYLON.Animation(
+          'animation', // 动画名称
+          'position.x', // 要改变的属性
+          frameRate, // 帧率 (frames per second)
+          BABYLON.Animation.ANIMATIONTYPE_FLOAT, // 属性类型
+          BABYLON.Animation.ANIMATIONLOOPMODE_YOYO // 循环模式
+        )
+
+        var yRot = new BABYLON.Animation(
+          'yRot',
+          'rotation.y',
+          frameRate,
+          BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+          BABYLON.Animation.ANIMATIONLOOPMODE_YOYO
+        )
+
+        // y 方向旋转:
+        // "rotation.y"
+        // BABYLON.Animation.ANIMATIONTYPE_FLOAT
+
+        // // x 方向缩放:
+        // "scaling.x"
+        // BABYLON.Animation.ANIMATIONTYPE_FLOAT
+
+        // // 各个方向都缩放:
+        // "scaling"
+        // BABYLON.Animation.ANIMATIONTYPE_VECTOR3
+
+        const keyFrames = []
+
+        keyFrames.push({
+          frame: 0,
+          value: 0
+        })
+
+        keyFrames.push({
+          frame: 1 * frameRate, // 30
+          value: 1
+        })
+
+        keyFrames.push({
+          frame: 2 * frameRate, // 60
+          value: 1.5
+        })
+
+        keyFrames.push({
+          frame: 3 * frameRate, // 90
+          value: 2
+        })
+
+        // 这步很重要！！！
+        animation.setKeys(keyFrames)
+        yRot.setKeys(keyFrames)
+
+        // box.animations.push(animation)
+        box.animations.push(...[animation, yRot]);
+
+        scene.beginAnimation(box, 0, 3 * frameRate, true)
+
+        return scene
+      }
+
+      // 创建场景
+      const scene = createScene()
+      // 注册一个渲染循环，以便在每一帧都渲染场景
+      engine.runRenderLoop(function () {
+        scene.render()
+      })
+      // 监听窗口大小变化，调整引擎的大小
+      window.addEventListener('resize', function () {
+        engine.resize()
+      })
+    </script>
+  </body>
+</html>
