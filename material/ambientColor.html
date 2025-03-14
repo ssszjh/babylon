@@ -55,12 +55,11 @@
         // 白光
         // light.diffuse = new BABYLON.Color3(0, 0, 0)
 
-        // 材质
-        const material = new BABYLON.StandardMaterial('material', scene)
-
         // 环境光
         // 环境光对应的是场景的 ambientColor属性，与材质的 ambientColor属性（或者 ambientTexture属性）相遇时产生的效果。
         // 环境光计算颜色: 跟漫反射一样,只是光源换成了场景光
+        // 材质
+        const material = new BABYLON.StandardMaterial('material', scene)
         material.ambientColor = new BABYLON.Color3(0.23, 0.98, 0.53) // 环境光颜色
 
         // 材质禁止光照

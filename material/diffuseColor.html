@@ -53,10 +53,6 @@
         // 白光
         light.diffuse = new BABYLON.Color3(1, 1, 1)
 
-        // 材质
-        const material = new BABYLON.StandardMaterial('material', scene)
-        // 使用三个浮点数参数来表示颜色的红色、绿色和蓝色分量。每个参数的范围是从 0 到 1。
-
         // 漫反射 光线在物体表面均匀散射的效果，决定了物体在光照下的主要颜色和外观。
         // 灯光设置漫反射属性(light.diffuse)，给材质设置漫反射颜色属性(material.diffuseColor)，两者相遇时，产生漫反射，显示最终看到的效果。
         // 漫反射计算颜色:
@@ -75,6 +71,9 @@
         // 缺点：
         // 缺乏细节: 仅使用漫反射可能无法表现出复杂的光照效果，如高光、反射等。
         // 依赖光源: 漫反射效果依赖于场景中的光源设置，光源不足时效果不明显。
+        // 材质
+        const material = new BABYLON.StandardMaterial('material', scene)
+        // 使用三个浮点数参数来表示颜色的红色、绿色和蓝色分量。每个参数的范围是从 0 到 1。
         material.diffuseColor = new BABYLON.Color3(1, 1, 0)
 
         // 材质禁止光照
